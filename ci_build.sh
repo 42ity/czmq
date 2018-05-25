@@ -8,19 +8,39 @@ default|valgrind|selftest)
         CONFIG_OPTS+=("--enable-address-sanitizer=yes")
     fi
 
+    if [ -n "${ZMQ_REPO}" ] && [ -z "${ZMQ_REPO_URL}" ]; then
+        ZMQ_REPO_URL="git://github.com/zeromq/${ZMQ_REPO}.git"
+    fi
+    if [ -z "${ZMQ_REPO}" ] && [ -n "${ZMQ_REPO_URL}" ]; then
+        ZMQ_REPO="`basename "${ZMQ_REPO_URL}" .git`"
+    fi
+    if [ -z "${ZMQ_REPO_URL}" ] || [ -z "${ZMQ_REPO}" ]; then
+        echo "ERROR Determining libzmq repo to build against" >&2
+        exit 1
+    fi
+    [ -n "${ZMQ_REPO_BRANCH}" ] || ZMQ_REPO_BRANCH="" ### Use github repo default
+    [ -n "${ZMQ_CONFIG_OPTS_DRAFT}" ] || ZMQ_CONFIG_OPTS_DRAFT=no
+
+    [ -n "${LIBSODIUM_REPO_URL}" ] || LIBSODIUM_REPO_URL="git://github.com/jedisct1/libsodium.git"
+    [ -n "${LIBSODIUM_REPO_BRANCH}" ] || LIBSODIUM_REPO_BRANCH="stable"
+
     # Build, check, and install libsodium if WITH_LIBSODIUM is set
     if [ "$WITH_LIBSODIUM" = 1 ]; then
-        echo "==== BUILD LIBSODIUM from git://github.com/jedisct1/libsodium.git stable branch ===="
-#        git clone git://github.com/jedisct1/libsodium.git &&
-        git clone -b stable git://github.com/jedisct1/libsodium.git &&
-        ( cd libsodium; git rev-parse HEAD; ./autogen.sh && ./configure "${CONFIG_OPTS[@]}" &&
+        echo "==== BUILD LIBSODIUM from $LIBSODIUM_REPO_URL '$LIBSODIUM_REPO_BRANCH' branch ===="
+        git clone "$LIBSODIUM_REPO_URL" libsodium && \
+        ( cd libsodium
+          if [ -n "$LIBSODIUM_REPO_BRANCH" ] ; then git checkout "$LIBSODIUM_REPO_BRANCH" ; fi
+          git rev-parse HEAD
+          ./autogen.sh && ./configure "${CONFIG_OPTS[@]}" &&
             make check && sudo make install && sudo ldconfig ) || exit 1
     fi
 
     # Build, check, and install the version of ZeroMQ given by ZMQ_REPO
-    echo "==== BUILD LIBZMQ from git://github.com/zeromq/${ZMQ_REPO}.git ===="
-    git clone git://github.com/zeromq/${ZMQ_REPO}.git &&
-    ( cd ${ZMQ_REPO}; git rev-parse HEAD; ./autogen.sh && ./configure "${CONFIG_OPTS[@]}" &&
+    echo "==== BUILD LIBZMQ from ${ZMQ_REPO_URL} '${ZMQ_REPO_BRANCH}' branch; ZMQ_CONFIG_OPTS_DRAFT='$ZMQ_CONFIG_OPTS_DRAFT' ===="
+    git clone ${ZMQ_REPO_URL} ${ZMQ_REPO} &&
+    ( cd ${ZMQ_REPO}
+        if [ -n "$ZMQ_REPO_BRANCH" ] ; then git checkout "$ZMQ_REPO_BRANCH" ; fi
+        git rev-parse HEAD; ./autogen.sh && ./configure "${CONFIG_OPTS[@]}" --enable-drafts="${ZMQ_CONFIG_OPTS_DRAFT}" &&
         make check && sudo make install && sudo ldconfig ) || exit 1
 
     # Build, check, and install CZMQ from local source
