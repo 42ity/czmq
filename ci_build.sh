@@ -9,7 +9,7 @@ default|valgrind|selftest)
     fi
 
     # Build, check, and install libsodium if WITH_LIBSODIUM is set
-    if [ -n "$WITH_LIBSODIUM" ]; then
+    if [ "$WITH_LIBSODIUM" = 1 ]; then
         echo "==== BUILD LIBSODIUM ===="
 #        git clone git://github.com/jedisct1/libsodium.git &&
         git clone -b stable git://github.com/jedisct1/libsodium.git &&
