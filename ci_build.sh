@@ -10,7 +10,7 @@ default|valgrind|selftest)
 
     # Build, check, and install libsodium if WITH_LIBSODIUM is set
     if [ "$WITH_LIBSODIUM" = 1 ]; then
-        echo "==== BUILD LIBSODIUM ===="
+        echo "==== BUILD LIBSODIUM from git://github.com/jedisct1/libsodium.git stable branch ===="
 #        git clone git://github.com/jedisct1/libsodium.git &&
         git clone -b stable git://github.com/jedisct1/libsodium.git &&
         ( cd libsodium; ./autogen.sh && ./configure "${CONFIG_OPTS[@]}" &&
@@ -24,7 +24,7 @@ default|valgrind|selftest)
         make check && sudo make install && sudo ldconfig ) || exit 1
 
     # Build, check, and install CZMQ from local source
-    echo "==== BUILD LIBCZMQ (current project) ===="
+    echo "==== BUILD LIBCZMQ (current project checkout) ===="
     ./autogen.sh && ./configure "${CONFIG_OPTS[@]}" && \
     case "$BUILD_TYPE" in
         default) make check-verbose VERBOSE=1 && sudo make install ;;
