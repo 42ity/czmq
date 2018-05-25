@@ -40,6 +40,7 @@ default|valgrind|selftest)
     git clone ${ZMQ_REPO_URL} ${ZMQ_REPO} &&
     ( cd ${ZMQ_REPO}
         if [ -n "$ZMQ_REPO_BRANCH" ] ; then git checkout "$ZMQ_REPO_BRANCH" ; fi
+        if [ "$WITH_LIBSODIUM" = 1 ]; then CONFIG_OPTS+=("--with-libsodium=yes") ; else CONFIG_OPTS+=("--with-libsodium=no") ; fi
         git rev-parse HEAD; ./autogen.sh && ./configure "${CONFIG_OPTS[@]}" --enable-drafts="${ZMQ_CONFIG_OPTS_DRAFT}" &&
         make check && sudo make install && sudo ldconfig ) || exit 1
 
