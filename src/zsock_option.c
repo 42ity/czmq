@@ -1345,7 +1345,20 @@ zsock_set_sndtimeo (void *self, int sndtimeo)
 #   if defined (ZMQ_SNDTIMEO)
     int rc = zmq_setsockopt (zsock_resolve (self), ZMQ_SNDTIMEO, &sndtimeo, sizeof (int));
     if (rc == -1 && sndtimeo == 0)
-        zsys_warning ("%s: rc=%d, sndtimeo=%d, zmq_errno ()=%d, zsys_interrupted=%d\nassert suppressed, this is OK in case of shutdown\n", __FUNCTION__, sndtimeo, zmq_errno (), zsys_interrupted);
+        zsys_warning ("%s: rc=%d, sndtimeo=%d, zmq_errno ()=%d, zsys_interrupted=%d\nassert suppressed, this is OK in case of shutdown\n",
+// Generated code amended here to avoid non-portable __FUNCTION__ macro
+// wherever pedantic compilers (gcc5+) complain. Not an issue with the
+// upstream czmq because it obsoleted and remade this part of codebase.
+#       if defined (__FUNCTION__)
+            __FUNCTION__,
+#       else
+#           if defined (__func__)
+            __func__,
+#           else
+            "zsock_set_sndtimeo()",
+#           endif
+#       endif
+            sndtimeo, zmq_errno (), zsys_interrupted);
     else
         assert (rc == 0 || zmq_errno () == ETERM);
 #   endif
