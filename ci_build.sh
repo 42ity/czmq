@@ -13,18 +13,19 @@ default|valgrind|selftest)
         echo "==== BUILD LIBSODIUM from git://github.com/jedisct1/libsodium.git stable branch ===="
 #        git clone git://github.com/jedisct1/libsodium.git &&
         git clone -b stable git://github.com/jedisct1/libsodium.git &&
-        ( cd libsodium; ./autogen.sh && ./configure "${CONFIG_OPTS[@]}" &&
+        ( cd libsodium; git rev-parse HEAD; ./autogen.sh && ./configure "${CONFIG_OPTS[@]}" &&
             make check && sudo make install && sudo ldconfig ) || exit 1
     fi
 
     # Build, check, and install the version of ZeroMQ given by ZMQ_REPO
     echo "==== BUILD LIBZMQ from git://github.com/zeromq/${ZMQ_REPO}.git ===="
     git clone git://github.com/zeromq/${ZMQ_REPO}.git &&
-    ( cd ${ZMQ_REPO}; ./autogen.sh && ./configure "${CONFIG_OPTS[@]}" &&
+    ( cd ${ZMQ_REPO}; git rev-parse HEAD; ./autogen.sh && ./configure "${CONFIG_OPTS[@]}" &&
         make check && sudo make install && sudo ldconfig ) || exit 1
 
     # Build, check, and install CZMQ from local source
     echo "==== BUILD LIBCZMQ (current project checkout) ===="
+    git rev-parse HEAD
     ./autogen.sh && ./configure "${CONFIG_OPTS[@]}" && \
     case "$BUILD_TYPE" in
         default) make check-verbose VERBOSE=1 && sudo make install ;;
