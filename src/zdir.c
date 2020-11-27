@@ -119,9 +119,17 @@ zdir_new (const char *path, const char *parent)
     zdir_t *self = (zdir_t *) zmalloc (sizeof (zdir_t));
     if (!self)
         return NULL;
+    if (!path)
+        return NULL;
+    if (!parent)
+        return NULL;
 
     if (parent) {
         if (streq (parent, "-")) {
+            if (streq (path, "")) {
+                zdir_destroy (&self);
+                return NULL;
+            }
             self->trimmed = true;
             self->path = strdup (path);
             if (!self->path) {
